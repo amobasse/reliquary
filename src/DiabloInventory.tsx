@@ -242,7 +242,7 @@ const defaultItems: Item[] = [
     position: { x: 6, y: 5 },
     size: { width: 2, height: 3 },
     imageUrl: "/api/placeholder/80/120",
-    rarity: "legendary",
+    rarity: "set",
     properties: [
       {
         name: "Armor Class",
@@ -494,17 +494,19 @@ const DiabloInventory = () => {
       case "common":
         return "#cccccc";
       case "uncommon":
-        return "#44bb44";
+        return "#89CFF0"; //blue
       case "rare":
-        return "#4444dd";
+        return "#4444dd"; //yellow
       case "very rare":
-        return "#4444dd";
+        return "#CD7F32"; //bronze
+      case "set":
+        return "#00FF00"; //green
       case "unique":
-        return "#4444dd";
+        return "#FFD700"; //gold
       case "epic":
-        return "#aa44ee";
+        return "#aa44ee"; //purple
       case "legendary":
-        return "#dd4444";
+        return "#FFA500"; //orange
       default:
         return "#5a3807";
     }
