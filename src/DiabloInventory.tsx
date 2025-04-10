@@ -1,40 +1,94 @@
+import React, { useState, useEffect } from "react";
+import fs from "fs";
+
+// Types
+type Position = {
+  x: number;
+  y: number;
+};
+
+type Size = {
+  width: number;
+  height: number;
+};
+
+type ItemProperty = {
+  name: string;
+  value: string;
+  color?: string;
+};
+
+type Item = {
+  id: string;
+  name: string;
+  position: Position;
+  size: Size;
+  imageUrl: string;
+  rarity?:
+    | "common"
+    | "uncommon"
+    | "rare"
+    | "very rare"
+    | "epic"
+    | "unique"
+    | "set"
+    | "legendary";
+  properties: ItemProperty[];
+  sounds?: {
+    pickup?: string;
+    drop?: string;
+  };
+};
+
+// Constants
+const CELL_SIZE = 40;
+const GRID_WIDTH = 10;
+const GRID_HEIGHT = 10;
+const SAVE_FILE_PATH = "src/data/inventory_save.json"; // Path for local save file
+const ITEM_VAULT_PATH = "src/data/item_vault.json";
+
 // Load inventory from file or use defaults
 const loadInventory = (): Item[] => {
   try {
     // Check if running in browser
-    if (typeof window !== 'undefined') {
+    if (typeof window !== "undefined") {
       // Try to load from localStorage first
-      const savedInventory = localStorage.getItem('dndInventory');
+      const savedInventory = localStorage.getItem("dndInventory");
       if (savedInventory) {
-        console.log('Loaded inventory from localStorage');
+        console.log("Loaded inventory from localStorage");
         return JSON.parse(savedInventory);
       }
     }
-    
+
     // For Node.js environments (only works with proper environment setup)
-    if (typeof process !== 'undefined' && process.versions && process.versions.node) {
+    if (
+      typeof process !== "undefined" &&
+      process.versions &&
+      process.versions.node
+    ) {
       try {
         // Using dynamic import with type assertion
-        const fs = (window as any).require ? (window as any).require('fs') : null;
+        const fs = (window as any).require
+          ? (window as any).require("fs")
+          : null;
         if (fs && fs.existsSync && fs.existsSync(SAVE_FILE_PATH)) {
-          const data = fs.readFileSync(SAVE_FILE_PATH, 'utf8');
-          console.log('Loaded inventory from file');
+          const data = fs.readFileSync(SAVE_FILE_PATH, "utf8");
+          console.log("Loaded inventory from file");
           return JSON.parse(data);
         }
       } catch (error) {
-        console.log('File loading not available:', error);
+        console.log("File loading not available:", error);
       }
     }
   } catch (error) {
-    console.error('Error loading inventory:', error);
+    console.error("Error loading inventory:", error);
   }
-  
-  // Return default items if nothing could be loaded
-  console.log('Using default inventory');
-  return defaultItems;
-};
 
-; // Function to play sounds
+  // Return default items if nothing could be loaded
+  console.log("Using default inventory");
+  return defaultItems;
+}; // Function to play sounds
+
 const playSound = (url?: string) => {
   if (!url) return;
 
@@ -51,25 +105,35 @@ const playSound = (url?: string) => {
 const saveInventory = (items: Item[]) => {
   try {
     // Save to localStorage for browser environments
-    if (typeof window !== 'undefined') {
-      localStorage.setItem('dndInventory', JSON.stringify(items));
-      console.log('Saved inventory to localStorage');
+    if (typeof window !== "undefined") {
+      localStorage.setItem("dndInventory", JSON.stringify(items));
+      console.log("Saved inventory to localStorage");
     }
-    
+
     // For Node.js/Electron environments
-    if (typeof process !== 'undefined' && process.versions && process.versions.node) {
+    if (
+      typeof process !== "undefined" &&
+      process.versions &&
+      process.versions.node
+    ) {
       try {
-        const fs = (window as any).require ? (window as any).require('fs') : null;
+        const fs = (window as any).require
+          ? (window as any).require("fs")
+          : null;
         if (fs && fs.writeFileSync) {
-          fs.writeFileSync(SAVE_FILE_PATH, JSON.stringify(items, null, 2), 'utf8');
-          console.log('Saved inventory to file');
+          fs.writeFileSync(
+            SAVE_FILE_PATH,
+            JSON.stringify(items, null, 2),
+            "utf8"
+          );
+          console.log("Saved inventory to file");
         }
       } catch (error) {
-        console.log('File saving not available:', error);
+        console.log("File saving not available:", error);
       }
     }
   } catch (error) {
-    console.error('Error saving inventory:', error);
+    console.error("Error saving inventory:", error);
   }
 };
 
@@ -206,44 +270,6 @@ const defaultItems: Item[] = [
     },
   },
 ];
-import React, { useState, useEffect } from "react";
-
-// Types
-type Position = {
-  x: number;
-  y: number;
-};
-
-type Size = {
-  width: number;
-  height: number;
-};
-
-type ItemProperty = {
-  name: string;
-  value: string;
-  color?: string;
-};
-
-type Item = {
-  id: string;
-  name: string;
-  position: Position;
-  size: Size;
-  imageUrl: string;
-  rarity?: "common" | "uncommon" | "rare" | "epic" | "legendary";
-  properties: ItemProperty[];
-  sounds?: {
-    pickup?: string;
-    drop?: string;
-  };
-};
-
-// Constants
-const CELL_SIZE = 40;
-const GRID_WIDTH = 10;
-const GRID_HEIGHT = 10;
-const SAVE_FILE_PATH = "src/data/inventory_save.json"; // Path for local save file
 
 const DiabloInventory = () => {
   const [items, setItems] = useState<Item[]>([]);
@@ -471,6 +497,10 @@ const DiabloInventory = () => {
         return "#44bb44";
       case "rare":
         return "#4444dd";
+      case "very rare":
+        return "#4444dd";
+      case "unique":
+        return "#4444dd";
       case "epic":
         return "#aa44ee";
       case "legendary":
@@ -490,10 +520,13 @@ const DiabloInventory = () => {
   }) => {
     const rarityColors = {
       common: "text-gray-200",
-      uncommon: "text-green-400",
-      rare: "text-blue-400",
+      uncommon: "text-blue-400",
+      rare: "text-yellow-400",
+      "very rare": "text-bronze-400",
+      set: "text-green-400",
       epic: "text-purple-400",
-      legendary: "text-red-400",
+      unique: "text-gold-400",
+      legendary: "text-orange-400",
     };
 
     const rarityColor = item.rarity
